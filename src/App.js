@@ -1,25 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import React, { useEffect, useState } from 'react';
+import { auth } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import Login from './components/Login';
+import Chat from './components/Chat';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Для отображения состояния загрузки
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+
+    // Очистка подписки при размонтировании
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div>Загрузка...</div>;
+  }
+
+  return user ? <Chat /> : <Login />;
+};
 
 export default App;
